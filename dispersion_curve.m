@@ -25,7 +25,7 @@ classdef dispersion_curve
         
         function obj = set.OSNRreqs(obj, OSNR)
             if isa(OSNR, 'double')
-                obj.OSNRreqs = OSNR;
+                obj.OSNRreqs = reshape(OSNR,length(OSNR),1);
             else
                 error('Invalid OSNR')
             end
@@ -33,7 +33,7 @@ classdef dispersion_curve
         
         function obj = set.residual_disp(obj, disps)
             if isa(disps, 'double')
-                obj.residual_disp = disps;
+                obj.residual_disp = reshape(disps,length(disps),1);
             else
                 error('Invalid disp')
             end
@@ -45,6 +45,25 @@ classdef dispersion_curve
             else
                 error('Invalid BER');
             end
+        end
+        
+        function cent = moment1(obj)
+            critOSNR=49; % dB
+            dDisp = 10; % ps/nm
+            
+            % select meaningful points of dispersion curve
+            working_ids=obj.OSNRreqs<critOSNR;
+            x = obj.residual_disp(working_ids);
+            y = critOSNR-obj.OSNRreqs(working_ids);
+            
+            % interpolate dispersion curve for uniform step
+            xq = min(x):dDisp:max(x);
+            yq = interp1(x,y,xq);
+            
+            % calculate zero and first moments of dispersion curve
+            % first moment will be the center
+            E0 = trapz(yq);
+            cent = trapz(xq.*yq)/E0;
         end
         
     end

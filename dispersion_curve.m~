@@ -25,7 +25,7 @@ classdef dispersion_curve
         
         function obj = set.OSNRreqs(obj, OSNR)
             if isa(OSNR, 'double')
-                obj.OSNRreqs = OSNR;
+                obj.OSNRreqs = reshape(OSNR,length(OSNR),1);
             else
                 error('Invalid OSNR')
             end
@@ -33,7 +33,7 @@ classdef dispersion_curve
         
         function obj = set.residual_disp(obj, disps)
             if isa(disps, 'double')
-                obj.residual_disp = disps;
+                obj.residual_disp = reshape(disps,length(disps),1);
             else
                 error('Invalid disp')
             end
@@ -47,7 +47,24 @@ classdef dispersion_curve
             end
         end
         
-        function 
+        function cent = moment1(obj)
+            critOSNR=49; % dB
+            dDisp = 10; % ps/nm
+            
+            % select meaningful points of dispersion curve
+            working_ids=obj.OSNRreqs<critOSNR;
+            x = obj.residual_disp(working_ids);
+            y = critOSNR-obj.OSNRreqs(working_ids);
+            
+            % interpolate dispersion curve for uniform step
+            xq = min(x):dDisp:max(x);
+            yq = interp1(x,y,xq);
+            
+            
+            E0 = trapz(yq);
+            cent = trapz(xq.*yq)/E0;
+        end
+        
     end
     
     methods (Static)
@@ -60,8 +77,8 @@ classdef dispersion_curve
             for k = 1:numb_of_curves
                 plot(curves(k).residual_disp, curves(k).OSNRreqs, paramsForPlot.optPlot{:})
             end
-            xlabel('Residual dispersion, ps/nm', paramsForPlot.optLabels{:});
-            ylabel('OSNRreq, dB', paramsForPlot.optLabels{:});
+            xlabel(paramsForPlot.xname, paramsForPlot.optLabels{:});
+            ylabel(paramsForPlot.yname, paramsForPlot.optLabels{:});
             names=[curves(:).description];
             legend(names,paramsForPlot.optLegends{:});
             hold off;
