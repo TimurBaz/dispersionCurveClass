@@ -47,15 +47,14 @@ classdef dispersion_curve
             end
         end
         
-        function cent = moment1(obj)
-            critOSNR=49; % dB
+        function cent = moment1(obj,critOSNR)
             dDisp = 10; % ps/nm
             
             % select meaningful points of dispersion curve
-            working_ids=obj.OSNRreqs<critOSNR;
+            working_ids = obj.OSNRreqs<critOSNR;
             x = obj.residual_disp(working_ids);
             y = critOSNR-obj.OSNRreqs(working_ids);
-            
+           
             % interpolate dispersion curve for uniform step
             xq = min(x):dDisp:max(x);
             yq = interp1(x,y,xq);
@@ -65,7 +64,6 @@ classdef dispersion_curve
             E0 = trapz(yq);
             cent = trapz(xq.*yq)/E0;
         end
-        
     end
     
     methods (Static)
@@ -80,8 +78,8 @@ classdef dispersion_curve
             end
             xlabel(paramsForPlot.xname, paramsForPlot.optLabels{:});
             ylabel(paramsForPlot.yname, paramsForPlot.optLabels{:});
-            names=[curves(:).description];
-            legend(names,paramsForPlot.optLegends{:});
+            names = [curves(:).description];
+            legend(names, paramsForPlot.optLegends{:});
             hold off;
         end
         

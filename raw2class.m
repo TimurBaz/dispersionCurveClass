@@ -44,5 +44,5 @@ defaultParamsForPlot.xname="Residual dispersion, ps/nm";
 f1 = dispersion_curve.onePlot(curves,defaultParamsForPlot);
 xlim([-1500,3000]);
 %%
-q = curves(1).moment1()
+q = curves(1).moment1(49)
    
